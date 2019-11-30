@@ -13,6 +13,8 @@ yarn add @susisu/tesseract
 Manipulating database with transaction.
 
 ``` typescript
+import { AsyncSession } from "@susisu/tesseract";
+
 const session = new AsyncSession({
   async initialize() {
     await begin();
@@ -42,6 +44,8 @@ async function updateA(session: AsyncSession): Promise<void> {
 Executing multiple edit operations while pushing at most one history to the undo buffer.
 
 ``` typescript
+import { Session } from "@susisu/tesseract";
+
 const session = new Session<State>({
   initialize() {
     return dumpState();
@@ -64,6 +68,8 @@ session.transact(() => {
 Updating a state multiple times while emitting at most one update event.
 
 ``` typescript
+import { Session } from "@susisu/tesseract";
+
 const session = new Session<State>({
   initialize() {
     return dumpState();
