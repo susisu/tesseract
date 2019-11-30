@@ -24,6 +24,18 @@ describe("Session", () => {
       expect(action).toHaveBeenCalledWith(s);
     });
 
+    it("should be consistent if multiple transactions run", () => {
+      const initialize = jest.fn(() => {});
+      const finalize = jest.fn(() => {});
+      const s = new Session({ initialize, finalize });
+      const action = jest.fn(() => {});
+      s.transact(action);
+      s.transact(action);
+      expect(initialize).toHaveBeenCalledTimes(2);
+      expect(action).toHaveBeenCalledTimes(2);
+      expect(finalize).toHaveBeenCalledTimes(2);
+    });
+
     it("should save state created by the initializer and pass it to the finalizer", () => {
       let state = 0;
       const initialize = jest.fn(() => state);
@@ -92,6 +104,20 @@ describe("Session", () => {
       expect(handleError).toHaveBeenCalledWith(err, "finalizing", 42);
     });
 
+    it("should be consistent if another transaction is started after error occurred", () => {
+      const initialize = jest.fn(() => {});
+      const finalize = jest.fn(() => {});
+      const handleError = jest.fn(() => {});
+      const s = new Session({ initialize, finalize, handleError });
+      expect(() => s.transact(() => { throw new Error("test"); })).toThrowError("test");
+      const action = jest.fn(() => {});
+      s.transact(action);
+      expect(initialize).toHaveBeenCalledTimes(2);
+      expect(action).toHaveBeenCalledTimes(1);
+      expect(finalize).toHaveBeenCalledTimes(1);
+      expect(handleError).toHaveBeenCalledTimes(1);
+    });
+
     it("should throw error if called in initializing phase", () => {
       const s = new Session({
         initialize: () => { s.transact(() => {}); },
@@ -146,6 +172,18 @@ describe("AsyncSession", () => {
       const action = jest.fn(async () => {});
       await s.transact(action);
       expect(action).toHaveBeenCalledWith(s);
+    });
+
+    it("should be consistent if multiple transactions run", async () => {
+      const initialize = jest.fn(async () => {});
+      const finalize = jest.fn(async () => {});
+      const s = new AsyncSession({ initialize, finalize });
+      const action = jest.fn(async () => {});
+      await s.transact(action);
+      await s.transact(action);
+      expect(initialize).toHaveBeenCalledTimes(2);
+      expect(action).toHaveBeenCalledTimes(2);
+      expect(finalize).toHaveBeenCalledTimes(2);
     });
 
     it("should save state created by the initializer and pass it to the finalizer", async () => {
@@ -214,6 +252,20 @@ describe("AsyncSession", () => {
       });
       await expect(s.transact(async () => {})).rejects.toThrowError("test");
       expect(handleError).toHaveBeenCalledWith(err, "finalizing", 42);
+    });
+
+    it("should be consistent if another transaction is started after error occurred", async () => {
+      const initialize = jest.fn(async () => {});
+      const finalize = jest.fn(async () => {});
+      const handleError = jest.fn(async () => {});
+      const s = new AsyncSession({ initialize, finalize, handleError });
+      await expect(s.transact(() => { throw new Error("test"); })).rejects.toThrowError("test");
+      const action = jest.fn(async () => {});
+      await s.transact(action);
+      expect(initialize).toHaveBeenCalledTimes(2);
+      expect(action).toHaveBeenCalledTimes(1);
+      expect(finalize).toHaveBeenCalledTimes(1);
+      expect(handleError).toHaveBeenCalledTimes(1);
     });
 
     it("should throw error if called in initializing phase", async () => {
