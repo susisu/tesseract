@@ -51,12 +51,22 @@ const session = new Session<State>({
     return dumpState();
   },
   finalize(oldState: State) {
-    const newState = dumpState();
-    if (!newState.equals(oldState)) {
-      pushHistory(oldState);
+    pushHistoryIfUpdated(oldState);
+  },
+  handleError(error, phase, oldState: State | undefined) {
+    if (oldState === undefined) {
+      return;
     }
+    pushHistoryIfUpdated(oldState);
   },
 });
+
+function pushHistoryIfUpdated(oldState: State): void {
+  const newState = dumpState();
+  if (!newState.equals(oldState)) {
+    pushHistory(oldState);
+  }
+}
 
 session.transact(() => {
   editA(session);
@@ -75,12 +85,22 @@ const session = new Session<State>({
     return dumpState();
   },
   finalize(oldState: State) {
-    const newState = dumpState();
-    if (!newState.equals(oldState)) {
-      emitUpdate();
+    emitIfUpdated(oldState);
+  },
+  handleError(error, phase, oldState: State | undefined) {
+    if (oldState === undefined) {
+      return;
     }
+    emitIfUpdated(oldState);
   },
 });
+
+function emitIfUpdated(oldState: State): void {
+  const newState = dumpState();
+  if (!newState.equals(oldState)) {
+    emit();
+  }
+}
 
 session.transact(() => {
   updateA(session);
