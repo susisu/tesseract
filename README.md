@@ -1,6 +1,6 @@
 # @susisu/tesseract
 
-[![Build Status](https://travis-ci.com/susisu/tesseract.svg?branch=master)](https://travis-ci.com/susisu/tesseract)
+[![CI](https://github.com/susisu/tesseract/workflows/CI/badge.svg)](https://github.com/susisu/tesseract/actions?query=workflow%3ACI)
 
 ``` shell
 npm i @susisu/tesseract
