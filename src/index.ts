@@ -55,7 +55,7 @@ export class Session<S = void> {
           this.phase = "finalizing";
           this.finalize.call(undefined, state);
           return res;
-        } catch (error) {
+        } catch (error: unknown) {
           const phase = this.phase;
           this.phase = "error";
           if (this.handleError) {
@@ -134,7 +134,7 @@ export class AsyncSession<S = void> {
           this.phase = "finalizing";
           await this.finalize.call(undefined, state);
           return res;
-        } catch (error) {
+        } catch (error: unknown) {
           const phase = this.phase;
           this.phase = "error";
           if (this.handleError) {
